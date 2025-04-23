@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 public class NFLTradeTool {
     public static void main(String[] args) {
+        new TradeSession();
+
         Scanner input = new Scanner(System.in);
         System.out.println("Please enter which Team you wish to act as: ");
 
