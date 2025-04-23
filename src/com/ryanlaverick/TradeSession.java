@@ -15,10 +15,6 @@ public class TradeSession {
 
         this.loadChart();
         this.loadPicks();
-
-        for (Map.Entry<Teams, DraftClass> entry : draftClasses.entrySet()) {
-            System.out.println(entry.getKey() + " - " + entry.getValue().toString());
-        }
     }
 
     private void loadChart() {
