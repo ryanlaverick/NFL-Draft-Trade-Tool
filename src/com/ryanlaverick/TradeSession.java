@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TradeSession {
     private final DraftChart draftChart;
@@ -172,9 +173,7 @@ public class TradeSession {
 
         System.out.println(sendingFrom.getShortName() + " is sending " + sendingWeight + " points worth of picks, in exchange for " + receivingWeight + " points worth of picks from " + sendingTo.getShortName());
 
-        if (sendingWeight > receivingWeight) {
-            tradeSuccess = true;
-        }
+        tradeSuccess = this.isSuccessful(sendingWeight, receivingWeight);
 
         if (tradeSuccess) {
             System.out.println("Successful trade! You sent: " + sending + " to " + sendingTo.getShortName() + " for " + receiving);
@@ -213,5 +212,20 @@ public class TradeSession {
 
     public Map<Teams, DraftClass> getDraftClasses() {
         return draftClasses;
+    }
+
+    private boolean isSuccessful(int offeredWeight, int targetWeight)  {
+        if (offeredWeight >= targetWeight) {
+            return true;
+        }
+
+        double weightBoundary = targetWeight * 0.9;
+        if (offeredWeight < weightBoundary) {
+            return false;
+        }
+
+        double weightProximity = (offeredWeight - weightBoundary) / (targetWeight - weightBoundary);
+
+        return ThreadLocalRandom.current().nextDouble() < weightProximity;
     }
 }
