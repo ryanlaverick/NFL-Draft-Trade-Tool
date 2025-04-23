@@ -15,6 +15,10 @@ public class TradeSession {
 
         this.loadChart();
         this.loadPicks();
+
+        for (Map.Entry<Teams, DraftClass> entry : draftClasses.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue().toString());
+        }
     }
 
     private void loadChart() {
@@ -27,6 +31,7 @@ public class TradeSession {
             System.out.println("Please select the Draft Chart you would like to use:");
             System.out.println("    1. Jimmy Johnson Draft Chart");
             System.out.println("    2. Rich Hill Draft Chart (Revised - 2025)");
+            System.out.println(" ");
 
             choice = input.nextInt();
         }
@@ -34,8 +39,12 @@ public class TradeSession {
         File draftChartFile;
         if (choice == 1) {
             draftChartFile = new File("src/jimmy-johnson-draft-chart.csv");
+            System.out.println("You picked: JIMMY JOHNSON DRAFT CHART");
+            System.out.println(" ");
         } else {
             draftChartFile = new File("src/rich-hill-draft-chart.csv");
+            System.out.println("You picked: RICH HILL DRAFT CHART (REVISED - 2025)");
+            System.out.println(" ");
         }
 
         if (! draftChartFile.exists()) {
@@ -80,8 +89,14 @@ public class TradeSession {
 
                 int round = Integer.parseInt(components[0]);
                 int pick = Integer.parseInt(components[1]);
-                int weight = Integer.parseInt(components[2]);
-                String team = String.valueOf(components[3]);
+                String team = String.valueOf(components[2]);
+
+                Optional<Selection> weightSelection = this.draftChart.selections().stream().filter((selection -> selection.round() == round && selection.pick() == pick)).findFirst();
+                if (weightSelection.isEmpty()) {
+                    System.out.println("Unable to determine weight for Round " + round + ", Pick " + pick);
+                    continue;
+                }
+                int weight = weightSelection.get().weight();
 
                 Teams teams = Teams.tryFrom(team);
 
