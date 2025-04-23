@@ -54,6 +54,11 @@ public class TradeSession {
         try (Scanner scanner = new Scanner(draftChartFile)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+
                 String[] components = line.split(",");
 
                 int round = Integer.parseInt(components[0]);
@@ -81,6 +86,11 @@ public class TradeSession {
         try (Scanner scanner = new Scanner(picksFile)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+
                 String[] components = line.split(",");
 
                 int round = Integer.parseInt(components[0]);
@@ -104,7 +114,8 @@ public class TradeSession {
                     DraftClass draftClass = this.draftClasses.get(teams);
                     draftClass.picks().add(new Selection(round, pick, weight));
                 } else {
-                    DraftClass draftClass = new DraftClass(List.of(new Selection(round, pick, weight)));
+                    DraftClass draftClass = new DraftClass(new ArrayList<>());
+                    draftClass.picks().add(new Selection(round, pick, weight));
                     this.draftClasses.put(teams, draftClass);
                 }
             }
