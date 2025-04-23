@@ -1,6 +1,5 @@
 package com.ryanlaverick;
 
-import java.io.Console;
 import java.util.Scanner;
 
 public class NFLTradeTool {
@@ -8,7 +7,16 @@ public class NFLTradeTool {
         Scanner input = new Scanner(System.in);
         System.out.println("Please enter which Team you wish to act as: ");
 
-        String team = input.nextLine();
-        System.out.println("You picked: " + team.toUpperCase());
+        String inputTeam = input.nextLine();
+        System.out.println("You picked: " + inputTeam.toUpperCase());
+
+        Teams team = Teams.tryFrom(inputTeam);
+
+        if (team == null) {
+            System.out.println("Unable to determine Team from input: " + inputTeam);
+            return;
+        }
+
+        System.out.println("Found team " + team.getAliases().toString() + " from input: " + inputTeam);
     }
 }
