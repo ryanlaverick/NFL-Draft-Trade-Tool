@@ -27,7 +27,6 @@ public class TradeSession {
             System.out.println("Please select the Draft Chart you would like to use:");
             System.out.println("    1. Jimmy Johnson Draft Chart");
             System.out.println("    2. Rich Hill Draft Chart (Revised - 2025)");
-            System.out.println(" ");
 
             choice = input.nextInt();
         }
@@ -36,11 +35,9 @@ public class TradeSession {
         if (choice == 1) {
             draftChartFile = new File("src/jimmy-johnson-draft-chart.csv");
             System.out.println("You picked: JIMMY JOHNSON DRAFT CHART");
-            System.out.println(" ");
         } else {
             draftChartFile = new File("src/rich-hill-draft-chart.csv");
             System.out.println("You picked: RICH HILL DRAFT CHART (REVISED - 2025)");
-            System.out.println(" ");
         }
 
         if (! draftChartFile.exists()) {
@@ -122,5 +119,99 @@ public class TradeSession {
         } catch (FileNotFoundException ignored) {
             System.out.println("Unable to read picks file! Please try again shortly...");
         }
+    }
+
+    /**
+     *
+     * @param sending -- This is a list of the picks being sent from your team. Example: 1.31, 2.40
+     * @param receiving -- This is a list of the picks being received back from the team you are trading with. Example: 2.59, 3.71
+     * @return
+     */
+    public boolean proposeTrade(Teams sendingFrom, String sending, Teams sendingTo, String receiving) {
+        int sendingWeight = 0;
+        int receivingWeight = 0;
+        boolean tradeSuccess = false;
+
+        DraftClass sendingClass = this.draftClasses.get(sendingFrom);
+        List<Selection> sendingSelections = new ArrayList<>();
+        for (String sendingPick : sending.split(",")) {
+            sendingPick = sendingPick.strip();
+
+            int round = Integer.parseInt(sendingPick.split("\\.")[0]);
+            int pick = Integer.parseInt(sendingPick.split("\\.")[1]);
+
+            Optional<Selection> selection = sendingClass.picks().stream().filter(predicate -> predicate.round() == round && predicate.pick() == pick).findFirst();
+
+            if (selection.isEmpty()) {
+                System.out.println("Team " + sendingFrom.getShortName() + " does not have pick " + sendingPick + "!");
+                return false;
+            }
+
+            sendingWeight += selection.get().weight();
+            sendingSelections.add(selection.get());
+        }
+
+        DraftClass receivingClass = this.draftClasses.get(sendingTo);
+        List<Selection> receivingSelections = new ArrayList<>();
+        for (String receivingPick : receiving.split(",")) {
+            receivingPick = receivingPick.strip();
+
+            int round = Integer.parseInt(receivingPick.split("\\.")[0]);
+            int pick = Integer.parseInt(receivingPick.split("\\.")[1]);
+
+            Optional<Selection> selection = receivingClass.picks().stream().filter(predicate -> predicate.round() == round && predicate.pick() == pick).findFirst();
+
+            if (selection.isEmpty()) {
+                System.out.println("Team " + sendingTo.getShortName() + " does not have pick " + receivingPick + "!");
+                return false;
+            }
+
+            receivingWeight += selection.get().weight();
+            receivingSelections.add(selection.get());
+        }
+
+        System.out.println(sendingFrom.getShortName() + " is sending " + sendingWeight + " points worth of picks, in exchange for " + receivingWeight + " points worth of picks from " + sendingTo.getShortName());
+
+        if (sendingWeight > receivingWeight) {
+            tradeSuccess = true;
+        }
+
+        if (tradeSuccess) {
+            System.out.println("Successful trade! You sent: " + sending + " to " + sendingTo.getShortName() + " for " + receiving);
+            System.out.println(" ");
+
+            for (Selection selection : sendingSelections) {
+                sendingClass.picks().remove(selection);
+                receivingClass.picks().add(selection);
+            }
+
+            for (Selection selection : receivingSelections) {
+                receivingClass.picks().remove(selection);
+                sendingClass.picks().add(selection);
+            }
+
+            sendingClass.picks().sort(Comparator.comparingInt(Selection::round).thenComparingInt(Selection::pick));
+            receivingClass.picks().sort(Comparator.comparingInt(Selection::round).thenComparingInt(Selection::pick));
+
+            System.out.println(sendingFrom.getShortName() + " now has the following picks:");
+            for (Selection selection : sendingClass.picks()) {
+                System.out.println(sendingFrom.getShortName() + " - Round " + selection.round() + ", pick " + selection.pick() + " is worth " + selection.weight() + " points");
+            }
+
+            System.out.println(" ");
+
+            System.out.println(sendingTo.getShortName() + " now has the following picks:");
+            for (Selection selection : receivingClass.picks()) {
+                System.out.println(sendingTo.getShortName() + " - Round " + selection.round() + ", pick " + selection.pick() + " is worth " + selection.weight() + " points");
+            }
+        } else {
+            System.out.println("No trade! Your package of " + sending + " to " + sendingTo.getShortName() + " for " + receiving + " was wide of the mark! Adjust your offer, and try again!");
+        }
+
+        return tradeSuccess;
+    }
+
+    public Map<Teams, DraftClass> getDraftClasses() {
+        return draftClasses;
     }
 }
