@@ -61,7 +61,7 @@ public class TradeSession {
 
                 int round = Integer.parseInt(components[0]);
                 int pick = Integer.parseInt(components[1]);
-                int weight = Integer.parseInt(components[2]);
+                float weight = Float.parseFloat(components[2]);
 
                 this.draftChart.selections().add(new Selection(round, pick, weight));
             }
@@ -100,7 +100,7 @@ public class TradeSession {
                     System.out.println("Unable to determine weight for Round " + round + ", Pick " + pick);
                     continue;
                 }
-                int weight = weightSelection.get().weight();
+                float weight = weightSelection.get().weight();
 
                 Teams teams = Teams.tryFrom(team);
 
